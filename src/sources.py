@@ -29,7 +29,12 @@ class FileTaskSource:
             with open(self.path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             for i in data:
-                tasks.append(Task(id=i["id"], payload=i["payload"]))
+                payload = i["payload"]
+                if isinstance(payload, dict):
+                    payload.setdefault("type", "file_task")
+                    payload.setdefault("priority", 1)
+                    payload.setdefault("sequence", i["id"])
+                tasks.append(Task(id=i["id"], payload=payload))
             logging.info(f"Загружено {len(tasks)} задач из файла {self.path}")
             return tasks
         except FileNotFoundError:
@@ -110,9 +115,22 @@ class ApiTaskSource:
         Создает API-заглушку с задачами
         """
         self._api_data = [
-            {"id": 1, "payload": {"type": "process_order", "priority": 3}},
-            {"id": 2, "payload": {"type": "send_notification", "priority": 2}},
-            {"id": 3, "payload": {"type": "recalculate_stats", "priority": 4}},
+            {
+                "id": 1,
+                "payload": {"type": "process_order", "priority": 3, "sequence": 1},
+            },
+            {
+                "id": 2,
+                "payload": {
+                    "type": "send_notification",
+                    "priority": 2,
+                    "sequence": 2,
+                },
+            },
+            {
+                "id": 3,
+                "payload": {"type": "recalculate_stats", "priority": 4, "sequence": 3},
+            },
         ]
 
     def get_tasks(self) -> list[Task]:

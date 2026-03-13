@@ -1,18 +1,12 @@
-"""
-Модуль CLI для загрузки задач
-"""
-
 from dataclasses import asdict
 import json
-from pathlib import Path
-
 import typer
-
+from pathlib import Path
 from src.loader import TaskLoader
-from src.logger import setup_logging
-from src.protocol import TaskSource
 from src.sources import ApiTaskSource, FileTaskSource, GeneratorTaskSource
 from src.task import Task
+from src.protocol import TaskSource
+from src.logger import setup_logging
 
 cli = typer.Typer(no_args_is_help=True)
 
