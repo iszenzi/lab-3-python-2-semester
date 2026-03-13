@@ -1,13 +1,9 @@
-"""
-Модуль настройки логирования
-"""
-
 import logging
 
 
-def setup_logging() -> None:
+def setup_logging():
     """
-    Создает конфиг логирования
+    Создание конфига логирования
     """
     logging.basicConfig(
         filename="shell.log",
