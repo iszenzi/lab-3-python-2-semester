@@ -33,3 +33,17 @@ class PriorityDescriptor:
             )
 
         setattr(instance, self.private_name, value)
+
+
+class DefaultDescriptionDescriptor:
+    """
+    Non-data дескриптор для описания по умолчанию.
+    """
+
+    def __init__(self, default_text: str = "Без описания"):
+        self.default_text = default_text
+
+    def __get__(self, instance: Any, owner: type) -> str:
+        if instance is None:
+            return self
+        return self.default_text
