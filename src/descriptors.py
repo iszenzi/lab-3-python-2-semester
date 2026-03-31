@@ -21,7 +21,7 @@ class PriorityDescriptor:
         return getattr(instance, self.private_name)
 
     def __set__(self, instance: Any, value: int) -> None:
-        if type(value) is not int:
+        if not isinstance(value, int):
             raise InvalidPriorityError(
                 f"Приоритет должен быть целым числом, получено: {type(value).__name__}"
             )
