@@ -47,6 +47,34 @@ class TestTask:
         task = Task(id=1, payload={})
         assert task.description == "Без описания"
 
+    def test_descriptors_data_vs_non_data(self):
+        """
+        Тест демонстрирует различие между Data и Non-Data дескрипторами.
+
+        Ключевое отличие: Data descriptor имеет приоритет над __dict__ экземпляра,
+        а Non-data descriptor уступает __dict__.
+        """
+        task = Task(id=1, payload={})
+
+        assert "description" not in task.__dict__
+        assert task.description == "Без описания"
+
+        task.description = "Новое описание"
+        assert "description" in task.__dict__
+        assert task.description == "Новое описание"
+
+        task.__dict__["description"] = "Прямая запись в dict"
+        assert task.description == "Прямая запись в dict"
+
+        task.priority = 4
+        assert "priority" not in task.__dict__
+        assert "_priority" in task.__dict__
+        assert task.__dict__["_priority"] == 4
+
+        task.__dict__["priority"] = 100
+        assert task.priority == 4
+        assert task.__dict__["priority"] == 100
+
     def test_task_state_transitions(self):
         """
         Проверяет успешные переходы состояний задачи (NEW -> IN_PROGRESS -> COMPLETED)
