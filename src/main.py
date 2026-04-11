@@ -23,7 +23,7 @@ def print_tasks(tasks: list[Task]) -> None:
             "priority": task.priority,
             "status": task.status.value,
             "description": task.description,
-            "created_at": task.created_at.isoformat(),  # <--- Добавлено время создания
+            "created_at": task.created_at.isoformat(),
         }
         print(json.dumps(task_dict, ensure_ascii=False))
 
