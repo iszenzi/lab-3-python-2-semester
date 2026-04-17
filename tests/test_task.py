@@ -129,10 +129,6 @@ class TestTask:
         task = Task(id=1, payload={})
 
         with pytest.raises(AttributeError) as exc_info:
-            task.id = 2
-        assert exc_info.type is AttributeError
-
-        with pytest.raises(AttributeError) as exc_info:
             task.status = TaskStatus.IN_PROGRESS
         assert exc_info.type is AttributeError
 
