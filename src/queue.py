@@ -1,3 +1,4 @@
+import logging
 from typing import Iterable, Iterator, Generator
 from src.task import Task, TaskStatus
 
@@ -46,6 +47,7 @@ class TaskQueue(Iterable[Task]):
         :param tasks: Коллекция задач для начального заполнения очереди
         """
         self._tasks: list[Task] = list(tasks) if tasks else []
+        logging.info(f"Создана очередь задач (элементов: {len(self._tasks)})")
 
     def add_task(self, task: Task) -> None:
         """
@@ -53,12 +55,17 @@ class TaskQueue(Iterable[Task]):
         :param task: Объект добавляемой задачи
         """
         self._tasks.append(task)
+        logging.info(f"Задача #{task.id} добавлена в очередь")
 
     def extend_tasks(self, tasks: Iterable[Task]) -> None:
         """
         Расширяет очередь переданным набором задач
         :param tasks: Коллекция задач для добавления
         """
+        tasks_list = list(tasks)
+        self._tasks.extend(tasks_list)
+        logging.info(f"Добавлено {len(tasks_list)} задач в очередь")
+
         self._tasks.extend(tasks)
 
     def __iter__(self) -> TaskQueueIterator:

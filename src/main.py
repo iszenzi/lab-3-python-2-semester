@@ -7,6 +7,7 @@ from src.sources import ApiTaskSource, FileTaskSource, GeneratorTaskSource
 from src.task import Task, TaskStatus
 from src.queue import TaskQueue
 from src.protocol import TaskSource
+import logging
 from src.logger import setup_logging
 
 cli = typer.Typer(no_args_is_help=True)
@@ -161,37 +162,37 @@ def process(
         all_tasks.extend(tasks)
 
     if not all_tasks:
-        print("Нет задач для загрузки.")
+        logging.warning("Нет задач для загрузки.")
         return
 
     queue = TaskQueue(all_tasks)
-    print(f"Очередь создана. Всего элементов: {len(queue)}\n")
+    logging.info(f"Очередь создана. Всего элементов: {len(queue)}\n")
 
-    print("Начинаем обработку задач...")
+    logging.info("Начинаем обработку задач...")
     for task in queue.get_ready_tasks():
-        print(f"Задача #{task.id} (Приоритет: {task.priority})")
+        logging.info(f"Задача #{task.id} (Приоритет: {task.priority})")
 
         task.start()
-        print(f"  -> Взята в работу. Новый статус: {task.status.value}")
+        logging.info(f"  -> Взята в работу. Новый статус: {task.status.value}")
 
         task.complete()
-        print(f"  -> Успешно завершена. Новый статус: {task.status.value}\n")
+        logging.info(f"  -> Успешно завершена. Новый статус: {task.status.value}\n")
 
-    print("Обработка завершена.\n")
+    logging.info("Обработка завершена.\n")
 
     if status is not None:
-        print(f"--- Задачи со статусом {status.value} ---")
+        logging.info(f"--- Задачи со статусом {status.value} ---")
         status_gen = queue.filter_by_status(status)
         for t in status_gen:
-            print(f"ID: {t.id}, Приоритет: {t.priority}")
-        print("---------------------------------------")
+            logging.info(f"ID: {t.id}, Приоритет: {t.priority}")
+        logging.info("---------------------------------------")
 
     if priority is not None:
-        print(f"--- Задачи с приоритетом {priority} ---")
+        logging.info(f"--- Задачи с приоритетом {priority} ---")
         priority_gen = queue.filter_by_priority(priority)
         for t in priority_gen:
-            print(f"ID: {t.id}, Статус: {t.status.value}")
-        print("---------------------------------------")
+            logging.info(f"ID: {t.id}, Статус: {t.status.value}")
+        logging.info("---------------------------------------")
 
 
 def main() -> None:
