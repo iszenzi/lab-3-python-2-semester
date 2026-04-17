@@ -64,9 +64,7 @@ class TaskQueue(Iterable[Task]):
         """
         tasks_list = list(tasks)
         self._tasks.extend(tasks_list)
-        logging.info(f"Добавлено {len(tasks_list)} задач в очередь")
-
-        self._tasks.extend(tasks)
+        logging.info(f"В очередь через extend добавлено {len(tasks_list)} задач")
 
     def __iter__(self) -> TaskQueueIterator:
         """
