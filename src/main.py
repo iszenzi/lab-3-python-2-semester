@@ -4,7 +4,8 @@ import typer
 from pathlib import Path
 from src.loader import TaskLoader
 from src.sources import ApiTaskSource, FileTaskSource, GeneratorTaskSource
-from src.task import Task
+from src.task import Task, TaskStatus
+from src.queue import TaskQueue
 from src.protocol import TaskSource
 from src.logger import setup_logging
 
@@ -104,6 +105,93 @@ def read(
         total += len(tasks)
 
     print(f"\nВсего: {total}")
+
+
+@cli.command("process")
+def process(
+    file: list[Path] = typer.Option(
+        default_factory=list,
+        exists=True,
+        dir_okay=False,
+        readable=True,
+        help="Читать задачи из JSON-файла (можно несколько раз)",
+    ),
+    generator: int | None = typer.Option(
+        None,
+        "--generator",
+        min=1,
+        help="Сгенерировать N задач",
+    ),
+    seed: int | None = typer.Option(
+        None,
+        "--seed",
+        help="Seed для генератора",
+    ),
+    api: bool = typer.Option(
+        False,
+        "--api",
+        help="Читать задачи из API-заглушки",
+    ),
+    status: TaskStatus | None = typer.Option(
+        None,
+        "--status",
+        help="Поиск задач по статусу (после обработки)",
+    ),
+    priority: int | None = typer.Option(
+        None,
+        "--priority",
+        help="Поиск задач по приоритету",
+    ),
+) -> None:
+    """
+    Загружает задачи в очередь и обрабатывает их, меняя статусы
+    """
+    sources: list[TaskSource] = []
+    for path in file:
+        sources.append(FileTaskSource(str(path)))
+    if generator is not None:
+        sources.append(GeneratorTaskSource(count=generator, seed=seed))
+    if api:
+        sources.append(ApiTaskSource())
+
+    loader = TaskLoader(sources)
+    all_tasks = []
+
+    for _, tasks in loader.load_tasks():
+        all_tasks.extend(tasks)
+
+    if not all_tasks:
+        print("Нет задач для загрузки.")
+        return
+
+    queue = TaskQueue(all_tasks)
+    print(f"Очередь создана. Всего элементов: {len(queue)}\n")
+
+    print("Начинаем обработку задач...")
+    for task in queue.get_ready_tasks():
+        print(f"Задача #{task.id} (Приоритет: {task.priority})")
+
+        task.start()
+        print(f"  -> Взята в работу. Новый статус: {task.status.value}")
+
+        task.complete()
+        print(f"  -> Успешно завершена. Новый статус: {task.status.value}\n")
+
+    print("Обработка завершена.\n")
+
+    if status is not None:
+        print(f"--- Задачи со статусом {status.value} ---")
+        status_gen = queue.filter_by_status(status)
+        for t in status_gen:
+            print(f"ID: {t.id}, Приоритет: {t.priority}")
+        print("---------------------------------------")
+
+    if priority is not None:
+        print(f"--- Задачи с приоритетом {priority} ---")
+        priority_gen = queue.filter_by_priority(priority)
+        for t in priority_gen:
+            print(f"ID: {t.id}, Статус: {t.status.value}")
+        print("---------------------------------------")
 
 
 def main() -> None:
